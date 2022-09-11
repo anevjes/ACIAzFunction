@@ -11,6 +11,7 @@ namespace ACIFunction
    
     public class ContainerGroup
     {
+        public string subscriptionId { get; set; }
         public string rgName { get; set; }
         public string name { get; set; }
         public string acrServer { get; set; }

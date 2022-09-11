@@ -27,24 +27,15 @@ namespace ACIFunction
             [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var outputs = new List<string>();
+            outputs.Add(await context.CallActivityAsync<string>("DoWork", context.GetInput<Data>()));
 
-            
-
-
-
-            // Replace "hello" with the name of your Durable Activity Function.
-            //outputs.Add(await context.CallActivityAsync<string>("Function1_Hello", azure));
-
-            await context.CallActivityAsync<string>("DoWork", context.GetInput<Data>());
-
-            // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
-            return null;
+            return outputs;
         }
 
         [FunctionName("DoWork")]
         public static async Task<string> DoWork([ActivityTrigger] Data inputData)
         {
-            var azure = await GetAzureContext();
+            var azure = await GetAzureContext(inputData.ContainerGroup.subscriptionId);
             RunTaskBasedContainer(azure, inputData.ContainerGroup.rgName, inputData.ContainerGroup.name, inputData.ContainerGroup.acrServer, inputData.ContainerGroup.acrUserName, inputData.ContainerGroup.acrPassword, inputData.ContainerGroup.acrImageName, null);
 
             return null;
@@ -67,9 +58,8 @@ namespace ACIFunction
             return starter.CreateCheckStatusResponse(req, instanceId);
         }
 
-        private async static Task<IAzure> GetAzureContext()
+        private async static Task<IAzure> GetAzureContext(string subscriptionId)
         {
-            string subscriptionId = "e4fc0399-4ecf-4e03-b54e-27ab303b2947";
 
             // Get service credentials through Managed Identity
             AzureServiceTokenProvider azureServiceTokenProvider = new AzureServiceTokenProvider();
